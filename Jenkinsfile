@@ -52,7 +52,7 @@ node {
 		// -------------------------------------------------------------------------
 
 		stage('Deploy and Run Tests') {
-		    sh "sfdx force:mdapi:deploy --wait 10 --deploydir ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
+		    sh "sfdx force:source:deploy --wait 10 --deploydir ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
 
 		}
 
@@ -62,7 +62,7 @@ node {
 		// -------------------------------------------------------------------------
 
 		stage('Check Only Deploy') {
-		   sh "sfdx force:mdapi:deploy --checkonly --wait 10 --deploydir ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
+		   sh "sfdx force:source:deploy --checkonly --wait 10 --deploydir ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
 
 		}
 	    }
