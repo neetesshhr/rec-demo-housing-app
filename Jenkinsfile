@@ -52,17 +52,17 @@ node {
 		// -------------------------------------------------------------------------
 
 		stage('Deploy and Run Tests') {
-		    sh "sfdx force:source:deploy --wait 10 --deploydir ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
+		    sh "sfdx force:source:deploy --wait 10 -p ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
 
 		}
 
 
 		// -------------------------------------------------------------------------
-		// Example shows how to run a check-only deploy.
+		// Example shows how to run a check-only deploy. in the org
 		// -------------------------------------------------------------------------
 
 		stage('Check Only Deploy') {
-		   sh "sfdx force:source:deploy --checkonly --wait 10 --deploydir ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
+		   sh "sfdx force:source:deploy --checkonly --wait 10 -p ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
 
 		}
 	    }
