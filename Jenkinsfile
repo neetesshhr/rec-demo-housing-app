@@ -42,7 +42,7 @@ node {
 		// -------------------------------------------------------------------------
 
 		stage('Authorize to Salesforce') {
-			sh "sfdx auth:jwt:grant --instanceurl ${SF_INSTANCE_URL} --clientid ${consumer_key} --jwtkeyfile ${server_key_file} --username ${SF_USERNAME} --setalias UAT"
+			sh "sfdx auth:jwt:grant -r ${SF_INSTANCE_URL} -i ${consumer_key} -f ${server_key_file} --username ${SF_USERNAME} -a UAT"
 	
 		}
 
