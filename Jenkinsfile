@@ -2,9 +2,9 @@
 
 node {
 
-    def SF_CONSUMER_KEY=env.sfdxkey
+    // def SF_CONSUMER_KEY=env.sfdxkey
     def SF_USERNAME=env.DEV_HUB_USER
-    def SERVER_KEY_CREDENTIALS_ID=env.clientid
+    // def SERVER_KEY_CREDENTIALS_ID=env.clientid
     def DEPLOYDIR='src'
     def TEST_LEVEL='RunLocalTests'
     def SF_INSTANCE_URL = env.DEV_HUB_URL ?: "https://login.salesforce.com"
@@ -33,13 +33,16 @@ node {
 
  	withEnv(["HOME=${env.WORKSPACE}"]) {	
 	
-	    withCredentials([file(credentialsId: SERVER_KEY_CREDENTIALS_ID, variable: 'server_key_file')]) {
+    withCredentials([file(credentialsId: 'sfdxkey', variable: 'server_key_file'), string(credentialsId: 'clientid', variable: 'consumer_key')]) {
+    // some block
+
+	    
 		// -------------------------------------------------------------------------
 		// Authenticate to Salesforce using the server key.
 		// -------------------------------------------------------------------------
 
 		stage('Authorize to Salesforce') {
-			sh "sfdx auth:jwt:grant --instanceurl ${SF_INSTANCE_URL} --clientid ${SF_CONSUMER_KEY} --jwtkeyfile ${server_key_file} --username ${SF_USERNAME} --setalias UAT"
+			sh "sfdx auth:jwt:grant --instanceurl ${SF_INSTANCE_URL} --clientid ${consumer_key} --jwtkeyfile ${server_key_file} --username ${SF_USERNAME} --setalias UAT"
 	
 		}
 
