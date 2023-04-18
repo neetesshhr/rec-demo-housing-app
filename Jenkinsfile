@@ -56,7 +56,9 @@ node {
         sh 'sfdx force:org:create -s -f config/project-scratch-def.json -a rec-house'
     }
 
-
+     stage('source push'){
+        sh "sfdx force:source:push"
+     }
 		// -------------------------------------------------------------------------
 		// Example shows how to run a check-only deploy. in the org
 		// -------------------------------------------------------------------------
