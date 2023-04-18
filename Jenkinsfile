@@ -4,22 +4,13 @@ node {
 
     // def SF_CONSUMER_KEY=env.sfdxkey
     def SF_USERNAME=env.DEV_HUB_USER
-    // def SERVER_KEY_CREDENTIALS_ID=env.clientid
+   
     def DEPLOYDIR='src'
     def TEST_LEVEL='RunLocalTests'
     def SF_INSTANCE_URL = env.DEV_HUB_URL ?: "https://login.salesforce.com"
 
 
-    // def toolbelt = tool 'toolbelt'
-    
-    // println 'keyname'	
-    // println SF_USERNAME
-    // println SF_CONSUMER_KEY
-    // println SERVER_KEY_CREDENTIALS_ID
-
-    // -------------------------------------------------------------------------
-    // Check out code from source control.
-    // -------------------------------------------------------------------------
+  
 
     stage('checkout source') {
         checkout scm
@@ -42,29 +33,53 @@ node {
 		// -------------------------------------------------------------------------
 
 		stage('Authorize to Salesforce') {
-			sh "sfdx auth:jwt:grant -r ${SF_INSTANCE_URL} -i ${consumer_key} -f ${server_key_file} --username ${SF_USERNAME} -a UAT"
+			sh "sfdx auth:jwt:grant -r ${SF_INSTANCE_URL} -i ${consumer_key} -f ${server_key_file} --username ${SF_USERNAME} -a UAT -d"
 	
 		}
 
 
 		// -------------------------------------------------------------------------
 		// Deploy metadata and execute unit tests.
-		// -------------------------------------------------------------------------
+		// ---------------------------------------q----------------------------------
 
-		stage('Deploy and Run Tests') {
-		    sh "sfdx force:source:deploy --wait 10 -p ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
-
-		}
+        stage('Delete Scratch Org if present') {
+        sh '''
+            orgList=$(sfdx force:org:list --clean --json)
+            scratchOrg=$(echo $orgList | jq '.result.scratchOrgs[] | select(.alias == "rec-house")')
+            if [ ! -z "$scratchOrg" ]
+            then
+                sfdx force:org:delete -u $scratchOrg.username -p
+            fi
+        '''
+    }
+    stage('Create Scratch Org') {
+        sh 'sfdx force:org:create -s -f config/project-scratch-def.json -a rec-house'
+    }
 
 
 		// -------------------------------------------------------------------------
 		// Example shows how to run a check-only deploy. in the org
 		// -------------------------------------------------------------------------
+        stage('Retrive the metadatafrom the org'){
+            sh "sfdx force:source:retrieve -x manifest/package.xml -r src2 -u  rec-house"
+        }
 
-		stage('Check Only Deploy') {
-		   sh "sfdx force:source:deploy --checkonly --wait 10 -p ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
+         stage('Deploy the metadata') {
+        // Run all tests in the org and check code coverage
+        def testResult = sh(script: "sfdx force:source:deploy -p src2 --testlevel RunAllTestsInOrg --runtests all --json -u rec-house", returnStdout: true)
+        def testJson = readJSON(text: testResult)
 
-		}
+        // Check if code coverage is less than 100%
+        def coverage = testJson.result.details.runTestResult.coverage
+        if (coverage != null && coverage.aggregateCoverage < 100) {
+            // If code coverage is less than 100%, log a warning and continue the pipeline
+            echo "Code coverage is less than 100% (${coverage.aggregateCoverage}%). Skipping deployment."
+            // sh 'sfdx force:org:open'
+        } else {
+            // Deploy metadata if code coverage is 100%
+            sh 'sfdx force:deploy --wait 10 --json --loglevel error --ignoreerrors'
+        }
+    }
 	    }
 	}
 }
