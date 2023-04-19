@@ -52,6 +52,12 @@ node {
             fi
         '''
     }
+    stage('generate scratch org password'){
+        sh "sfdx force:user:password:generate -u rec-house"
+    }
+    stage('display scratch org credentials'){
+        sh "sfdx force:org:display -u rec-house > creds_scratchorg.json"
+    }
     stage('Create Scratch Org') {
         sh 'sfdx force:org:create -s -f config/project-scratch-def.json -a rec-house'
     }
