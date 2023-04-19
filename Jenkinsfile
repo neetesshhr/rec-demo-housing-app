@@ -66,22 +66,10 @@ node {
             sh "sfdx force:source:retrieve -x manifest/package.xml -r src2 -u  rec-house"
         }
 
-         stage('Deploy the metadata') {
+        stage('Deploy the metadata') {
         // Run all tests in the org and check code coverage
-        def testResult = sh(script: "sfdx force:source:deploy -p src2 --testlevel RunAllTestsInOrg --runtests all --json -u rec-house", returnStdout: true)
-        def testJson = readJSON(text: testResult)
-
-        // Check if code coverage is less than 100%
-        def coverage = testJson.result.details.runTestResult.coverage
-        if (coverage != null && coverage.aggregateCoverage < 100) {
-            // If code coverage is less than 100%, log a warning and continue the pipeline
-            echo "Code coverage is less than 100% (${coverage.aggregateCoverage}%). Skipping deployment."
-            // sh 'sfdx force:org:open'
-        } else {
-            // Deploy metadata if code coverage is 100%
-            sh 'sfdx force:deploy --wait 10 --json --loglevel error --ignoreerrors'
-        }
-    }
+              sh "sfdx force:source:deploy -p src2 -l RunAllTestsInOrg --json -u rec-house > output.json"
+            }
 	    }
 	}
 }
