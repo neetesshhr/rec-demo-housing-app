@@ -6,7 +6,7 @@ node {
     def SF_USERNAME=env.DEV_HUB_USER
    
     def DEPLOYDIR='src'
-    def TEST_LEVEL='RunLocalTests'
+    def TEST_LEVEL='RunAllTestsInOrgs'
     def SF_INSTANCE_URL = env.DEV_HUB_URL ?: "https://login.salesforce.com"
 
 
